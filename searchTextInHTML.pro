@@ -1,8 +1,9 @@
-QT += quick
+QT += quick network
 CONFIG += c++11
 
 SOURCES += main.cpp \
-    searchengine.cpp
+    searchengine.cpp \
+    downloader.cpp
 
 RESOURCES += qml.qrc
 
@@ -18,4 +19,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    searchengine.h
+    searchengine.h \
+    downloader.h
