@@ -32,6 +32,7 @@ private:
    QString m_starting_URL;
    QString m_target_text;
    int m_max_URL_count = -1;
+   bool m_can_start_scan = true; ///<! it's set to false in cases of fault inputs
 };
 
 #endif // SEARCHENGINE_H

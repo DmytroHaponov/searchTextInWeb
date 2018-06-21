@@ -1,15 +1,19 @@
 #include "downloader.h"
+//#include
 
-#include <QThread>
+
 #include <QDebug>
 
-DownLoader::DownLoader(QString url) :
+
+DownLoader::DownLoader(QString url, SearchEngine* engine) :
     m_url(url)
+  , m_engine(engine)
 {
 }
 
 void DownLoader::run()
 {
-    QThread::sleep(2);
 
+
+qDebug()<<m_url;
 }
