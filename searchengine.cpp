@@ -10,9 +10,9 @@ SearchEngine::SearchEngine(QObject *parent) : QObject(parent)
 
 }
 
-void SearchEngine::on_main_URL_received(QString url)
+void SearchEngine::on_main_URL_received(const QString& url)
 {
-    if (m_thread_pool.maxThreadCount() > m_max_URL_count)
+    if (m_local_search_thread_pool.maxThreadCount() > m_max_URL_count)
     {
         m_can_start_scan = false;
         emit error_msg(QString("plz make threads quantity less than max URL count"));
@@ -22,28 +22,38 @@ void SearchEngine::on_main_URL_received(QString url)
         return;
     }
     m_starting_URL = url;
-
+    DownLoader downloader(m_starting_URL);
+    downloader.setAutoDelete(false);
+    QThreadPool* global_thread_pool = QThreadPool::globalInstance();
+    global_thread_pool->start(&downloader);
+    connect(&downloader, &DownLoader::download_progress_changed, this, &SearchEngine::download_progress_changed);
+    connect(&downloader, &DownLoader::download_finished, this, &SearchEngine::page_downloaded);
 }
 
-void SearchEngine::set_max_threads_count(QString count)
+void SearchEngine::set_max_threads_count(const QString& count)
 {
     int quantity = qstring_to_int(count, QString("threads quantity"));
     // thread pool will always use at least 1 thread
     // even if maxThreadCount limit is zero or negative.
-    m_thread_pool.setMaxThreadCount(quantity);
+    m_local_search_thread_pool.setMaxThreadCount(quantity);
 }
 
-void SearchEngine::set_target_text(QString text)
+void SearchEngine::set_target_text(const QString& text)
 {
     m_target_text = text;
 }
 
-void SearchEngine::set_max_URL_quantity(QString count)
+void SearchEngine::set_max_URL_quantity(const QString& count)
 {
     m_max_URL_count = qstring_to_int(count, QString("max URL count"));
 }
 
-int SearchEngine::qstring_to_int(QString count, QString msg)
+void SearchEngine::page_downloaded(const QString& url)
+{
+    emit download_progress_changed(1, 1, url);
+}
+
+int SearchEngine::qstring_to_int(const QString& count, const QString& msg)
 {
     if (count == QString("0"))
     {

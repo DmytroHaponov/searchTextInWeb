@@ -92,11 +92,25 @@ Window {
         visible: false
     }
 
+    ProgressBar {
+        id: _firstProgress
+        anchors.right: parent.right
+        anchors.rightMargin: 50
+        anchors.top: parent.top
+        height: 10
+        width: 100
+    }
+
     Connections {
         target: search_engine
         onError_msg: {
             _errorText.text = msg;
             _errorPopup.visible = true;
+        }
+
+        onDownload_progress_changed: {
+            _firstProgress.value = part;
+            _firstProgress.to = max;
         }
     }
 }
