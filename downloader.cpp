@@ -1,6 +1,10 @@
 #include "downloader.h"
 #include <QNetworkReply>
 
+#include <QEventLoop>
+#include <QThread>
+#include <QFile>
+
 DownLoader::DownLoader(const QString& url, QObject* parent) :
     QObject(parent)
    , m_url_str(url)
@@ -9,15 +13,27 @@ DownLoader::DownLoader(const QString& url, QObject* parent) :
 
 void DownLoader::run()
 {
+    //emit download_progress_changed(10, 100, m_url_str);
     QUrl url(m_url_str);
     QNetworkRequest request(url);
     QNetworkAccessManager* m_qnam = new QNetworkAccessManager();
     QNetworkReply* reply = m_qnam->get(request);
-    connect(reply, &QNetworkReply::downloadProgress, [this](qint64 part, qint64 max)
-    {
-        emit download_progress_changed(part, max, m_url_str);
+    QEventLoop event;
+    connect(reply, &QNetworkReply::downloadProgress, [this, &event](qint64 part, qint64 max)
+    {       
+        event.processEvents();
+        emit download_progress_changed(part, max, QString(""));
     });
-    connect(reply, &QNetworkReply::finished, [this]{ emit download_finished(m_url_str); });
+    connect(reply, &QNetworkReply::finished, [this, &event]{
+        emit download_finished(m_url_str);
+        event.quit();});
+
+    event.exec();
+
+    QFile temp("html.out");
+    if(!temp.open(QIODevice::WriteOnly/*| QIODevice::Text*/))
+        return;
+    temp.write(reply->readAll());
 }
 /*
  *shift

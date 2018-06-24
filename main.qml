@@ -11,32 +11,41 @@ Window {
     Column {
         id: _inputsRow
         anchors.top: parent.top
-        anchors.topMargin: 50
-        anchors.left: parent.left
-        anchors.leftMargin: 60
-        spacing: 50
+        anchors.topMargin: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        spacing: 20
 
         InputAndLabel {
             id: _mainUrl
             text: qsTr("input URL")
-        }
-        InputAndLabel {
-            id: _downloadThreads
-            text: qsTr("download threads quantity")
+            inputWidth: 500
         }
         InputAndLabel {
             id: _targetText
             text: qsTr("text to search")
+            inputWidth: 500
         }
-        InputAndLabel {
-            id: _maxURLs
-            text: qsTr("max URL quantity")
+        Row {
+            id: _innerRow
+            spacing: 150
+
+            InputAndLabel {
+                id: _downloadThreads
+                text: qsTr("download threads quantity")
+            }
+            InputAndLabel {
+                id: _maxURLs
+                text: qsTr("maximum URL quantity")
+            }
         }
     }
 
     RoundButton {
         id: _launchBtn
-        anchors.centerIn: parent
+        anchors.bottom: _inputsRow.bottom
+        anchors.bottomMargin: -radius
+        anchors.horizontalCenter: _inputsRow.horizontalCenter
         height: 60
         width: 60
         radius: 30
@@ -97,7 +106,28 @@ Window {
         anchors.right: parent.right
         anchors.rightMargin: 50
         anchors.top: parent.top
-        height: 10
+
+        padding: 2
+
+              background: Rectangle {
+                  implicitWidth: 200
+                  implicitHeight: 6
+                  color: "#e6e6e6"
+                  radius: 3
+              }
+
+              contentItem: Item {
+                  implicitWidth: 200
+                  implicitHeight: 4
+
+                  Rectangle {
+                      width: _firstProgress.visualPosition * parent.width
+                      height: parent.height
+                      radius: 2
+                      color: "#17a81a"
+                  }
+              }
+        height: 15
         width: 100
     }
 
@@ -109,8 +139,13 @@ Window {
         }
 
         onDownload_progress_changed: {
+            if (_firstProgress.value === _firstProgress.to) {
+                // ingore spurious indeterminate signals after download is complete
+                return;
+            }
             _firstProgress.value = part;
             _firstProgress.to = max;
+            _firstProgress.indeterminate = (max === -1)
         }
     }
 }

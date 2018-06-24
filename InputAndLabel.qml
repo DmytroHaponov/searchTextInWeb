@@ -5,16 +5,38 @@ Item {
     id: root
     property alias text: _URLlabel.text
     property alias input: _url.text
+    property alias inputWidth: _editRect.width
 
     height: _editRect.height + _URLlabel.height
     width: _editRect.width > _URLlabel.width
            ? _editRect.width
            : _URLlabel.width
 
+    Label {
+        id: _URLlabel
+
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        background: Rectangle {
+            id: _URLlabelBack
+            gradient: Gradient {
+                GradientStop { position: 0.4; color: "purple" }
+                GradientStop { position: 1.0; color: "green" }
+            }
+        }
+        color: "white"
+        height: 30
+        width: contentWidth
+    }
+
     Rectangle {
         id: _editRect
+        anchors.top: _URLlabel.bottom
+        anchors.topMargin: 1
+        anchors.horizontalCenter: parent.horizontalCenter
         border.color: "red"
-        height: 50
+        height: 30
         width: 100
 
         TextEdit {
@@ -23,24 +45,5 @@ Item {
             color: "purple"
             padding: 5
         }
-    }
-
-    Label {
-        id: _URLlabel
-
-        anchors.bottom: _editRect.top
-        anchors.bottomMargin: 3
-        anchors.horizontalCenter: _editRect.horizontalCenter
-
-        background: Rectangle {
-            id: _URLlabelBack
-            gradient: Gradient {
-                GradientStop { position: 0.4; color: "white" }
-                GradientStop { position: 1.0; color: "green" }
-            }
-        }
-
-        height: 30
-        width: contentWidth
     }
 }

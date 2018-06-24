@@ -1,6 +1,9 @@
 #ifndef SEARCHENGINE_H
 #define SEARCHENGINE_H
 
+
+#include <QEventLoop>
+
 #include <QObject>
 #include <map>
 #include <list>
@@ -58,6 +61,14 @@ private:
     //! whether input data allows to implement search
     //! it's set to false in cases of fault inputs
     bool m_can_start_scan = true;
+
+
+
+
+
+
+
+    QEventLoop event;
 };
 
 #endif // SEARCHENGINE_H
