@@ -7,7 +7,7 @@
 
 SearchEngine::SearchEngine(QObject *parent) : QObject(parent)
 {
-
+    m_local_search_thread_pool.setMaxThreadCount(2); // not specified by requirements
 }
 
 void SearchEngine::on_main_URL_received(const QString& url)
@@ -22,18 +22,16 @@ void SearchEngine::on_main_URL_received(const QString& url)
         return;
     }
     m_starting_URL = url;
-    DownLoader downloader(m_starting_URL);
-    downloader.setAutoDelete(false);
+    DownLoader* downloader = new DownLoader(m_starting_URL);
+    // downloader will be deleted by global Thread pool
     QThreadPool* global_thread_pool = QThreadPool::globalInstance();
-
-    connect(&downloader, &DownLoader::download_progress_changed, [this](qint64 part, qint64 max, QString url)
+    connect(downloader, &DownLoader::download_progress_changed, /*[this](qint64 part, qint64 max, QString url)
     {
         emit SearchEngine::download_progress_changed(part, max, url);
-        event.processEvents();
-    }) ;//this, &SearchEngine::download_progress_changed);
-    connect(&downloader, &DownLoader::download_finished, this, &SearchEngine::page_downloaded);
-    global_thread_pool->start(&downloader);
-    event.exec();
+    }) ;*/
+            this, &SearchEngine::download_progress_changed);
+    connect(downloader, &DownLoader::download_finished, this, &SearchEngine::page_downloaded);
+    global_thread_pool->start(downloader);
 }
 
 void SearchEngine::set_max_threads_count(const QString& count)
@@ -57,7 +55,7 @@ void SearchEngine::set_max_URL_quantity(const QString& count)
 void SearchEngine::page_downloaded(const QString& url)
 {
     emit download_progress_changed(1, 1, url);
-    event.quit();
+
 }
 
 int SearchEngine::qstring_to_int(const QString& count, const QString& msg)

@@ -13,6 +13,7 @@ public:
     QStringList search_urls_in_line(const QString& line);
 
 signals:
+    QVector<QPair<int /*line*/, int /*column*/>> found_targets;
 
 public slots:
 

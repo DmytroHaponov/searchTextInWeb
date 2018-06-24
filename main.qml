@@ -19,16 +19,18 @@ Window {
         InputAndLabel {
             id: _mainUrl
             text: qsTr("input URL")
-            inputWidth: 500
+            inputWidth: 600
         }
         InputAndLabel {
             id: _targetText
             text: qsTr("text to search")
-            inputWidth: 500
+            inputWidth: 600
         }
         Row {
             id: _innerRow
-            spacing: 150
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: parent.width - _downloadThreads.width - _maxURLs.width
 
             InputAndLabel {
                 id: _downloadThreads
@@ -102,7 +104,7 @@ Window {
     }
 
     ProgressBar {
-        id: _firstProgress
+        id: _progressBar
         anchors.right: parent.right
         anchors.rightMargin: 50
         anchors.top: parent.top
@@ -121,7 +123,7 @@ Window {
                   implicitHeight: 4
 
                   Rectangle {
-                      width: _firstProgress.visualPosition * parent.width
+                      width: _progressBar.visualPosition * parent.width
                       height: parent.height
                       radius: 2
                       color: "#17a81a"
@@ -139,13 +141,13 @@ Window {
         }
 
         onDownload_progress_changed: {
-            if (_firstProgress.value === _firstProgress.to) {
+            if (_progressBar.value === _progressBar.to) {
                 // ingore spurious indeterminate signals after download is complete
                 return;
             }
-            _firstProgress.value = part;
-            _firstProgress.to = max;
-            _firstProgress.indeterminate = (max === -1)
+            _progressBar.value = part;
+            _progressBar.to = max;
+            _progressBar.indeterminate = (max === -1)
         }
     }
 }

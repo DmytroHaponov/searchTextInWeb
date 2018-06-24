@@ -1,12 +1,10 @@
 #ifndef SEARCHENGINE_H
 #define SEARCHENGINE_H
 
-
-#include <QEventLoop>
-
 #include <QObject>
 #include <map>
 #include <list>
+#include <queue>
 #include <QNetworkReply>
 #include <QThreadPool>
 
@@ -43,8 +41,9 @@ private:
     int qstring_to_int(const QString& count, const QString& msg);
 
 private:
-    //! string - parent url, where link was found
-    std::map<QString, std::list<QNetworkReply*>> m_downloaded;
+    //! QString - parent url, where link was found
+    std::map<QString /*parent_url*/, std::list<QString*>> m_downloaded_pages;
+    std::queue<QString> processed;
 
     //! thread pool for search in downloaded URLs
     QThreadPool m_local_search_thread_pool;
@@ -61,14 +60,6 @@ private:
     //! whether input data allows to implement search
     //! it's set to false in cases of fault inputs
     bool m_can_start_scan = true;
-
-
-
-
-
-
-
-    QEventLoop event;
 };
 
 #endif // SEARCHENGINE_H
