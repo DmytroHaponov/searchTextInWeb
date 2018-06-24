@@ -1,13 +1,27 @@
 #include "searchengine.h"
 #include "downloader.h"
-
-
+#include "scanner.h"
+#include <QFile>
+#include<QFileInfo>
 #include <QDebug>
-
 
 SearchEngine::SearchEngine(QObject *parent) : QObject(parent)
 {
     m_local_search_thread_pool.setMaxThreadCount(2); // not specified by requirements
+}
+
+void SearchEngine::download_page(const QString& page_name)
+{
+    DownLoader* downloader = new DownLoader(page_name);
+    // downloader will be deleted by global Thread pool
+    QThreadPool* global_thread_pool = QThreadPool::globalInstance();
+    connect(downloader, &DownLoader::download_progress_changed, /*[this](qint64 part, qint64 max, QString url)
+            {
+                emit SearchEngine::download_progress_changed(part, max, url);
+            }) ;*/
+            this, &SearchEngine::download_progress_changed);
+    connect(downloader, &DownLoader::download_finished, this, &SearchEngine::on_page_downloaded);
+    global_thread_pool->start(downloader);
 }
 
 void SearchEngine::on_main_URL_received(const QString& url)
@@ -22,16 +36,7 @@ void SearchEngine::on_main_URL_received(const QString& url)
         return;
     }
     m_starting_URL = url;
-    DownLoader* downloader = new DownLoader(m_starting_URL);
-    // downloader will be deleted by global Thread pool
-    QThreadPool* global_thread_pool = QThreadPool::globalInstance();
-    connect(downloader, &DownLoader::download_progress_changed, /*[this](qint64 part, qint64 max, QString url)
-    {
-        emit SearchEngine::download_progress_changed(part, max, url);
-    }) ;*/
-            this, &SearchEngine::download_progress_changed);
-    connect(downloader, &DownLoader::download_finished, this, &SearchEngine::page_downloaded);
-    global_thread_pool->start(downloader);
+    download_page(m_starting_URL);
 }
 
 void SearchEngine::set_max_threads_count(const QString& count)
@@ -50,12 +55,40 @@ void SearchEngine::set_target_text(const QString& text)
 void SearchEngine::set_max_URL_quantity(const QString& count)
 {
     m_max_URL_count = qstring_to_int(count, QString("max URL count"));
+    m_processed.assign(m_max_URL_count, 0); // fill with theoretical max of zeros
 }
 
-void SearchEngine::page_downloaded(const QString& url)
+void SearchEngine::on_page_downloaded(const QString& url)
 {
     emit download_progress_changed(1, 1, url);
-
+    if(!m_downloaded_graph.size())
+    {
+        // start first scan
+        QUrl url(m_starting_URL);
+        QFileInfo fileInfo = url.path();
+        QString file_name = QString("downloads/") + fileInfo.completeBaseName();
+        QFile input_file(file_name);
+        if (!input_file.open(QIODevice::ReadOnly))
+        {
+            qDebug()<< "could not read "<<input_file.fileName();
+            return;
+        }
+        Scanner scanner(m_target_text);
+        QMap<int, QVector<int>> targets;
+        //QStringList new_urls;
+        int line_number = 0;
+        char line_text[1024];
+        while(input_file.readLine(line_text, sizeof(line_text)) != -1)
+        {
+            ++line_number;
+            auto vec = scanner.search_target_in_line(QString(line_text));
+            if (vec.size())
+            {
+                targets.insert(line_number, vec);
+            }
+        }
+    }
+    //m_downloaded_graph.at(url)
 }
 
 int SearchEngine::qstring_to_int(const QString& count, const QString& msg)

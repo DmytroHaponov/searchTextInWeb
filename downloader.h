@@ -36,12 +36,15 @@ signals:
     void download_finished(QString url);
 
 private:
+    /*!
+     * \brief write downloaded data to local file
+     * \param url to generate filename
+     */
+    void save_to_file(const QUrl& url, QNetworkReply *reply);
+
+private:
     //! url to download
     QString m_url_str;
-
-    //! implements download of web resource
-
-
 };
 
 #endif // DOWNLOADER_H

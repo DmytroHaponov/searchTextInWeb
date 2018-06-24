@@ -14,21 +14,57 @@ class SearchEngine : public QObject
 public:
     explicit SearchEngine(QObject *parent = nullptr);
 
+    /*!
+     * \brief download page to local file
+     * \param page_name - url to download
+     */
+    void download_page(const QString& page_name);
+
 signals:
     /*!
      * \brief error_msg - signal for QML to display error in C++ processing data passed from QML
      * \param msg - message describing error
      */
     void error_msg(QString msg);
+
+    /*!
+     * \brief update progress bar for downloading url
+     * \param part - how much has been downloaded
+     * \param max - what is 100%
+     * \param url - what page
+     */
     void download_progress_changed(qint64 part, qint64 max, QString url);
 
 public slots:
+    /*!
+     * \brief user input starting URL
+     * \param url - where search starts
+     */
     void on_main_URL_received(const QString& url);
+
+    /*!
+     * \brief set maximum number of simultaneously downloading threads
+     * \param count - number to set
+     */
     void set_max_threads_count(const QString& count);
+
+    /*!
+     * \brief set what text to search
+     * \param text - what to search
+     */
     void set_target_text(const QString& text);
+
+    /*!
+     * \brief set when to stop in case urls don't stop being found
+     * \param count - maximum number of urls
+     */
     void set_max_URL_quantity(const QString& count);
 
-    void page_downloaded(const QString& url);
+    /*!
+     * \brief once url is downloaded - start new scan &/or download
+     * \param url - what page has been downloaded
+     */
+    void on_page_downloaded(const QString& url);
 
 private:
     /*!
@@ -42,8 +78,9 @@ private:
 
 private:
     //! QString - parent url, where link was found
-    std::map<QString /*parent_url*/, std::list<QString*>> m_downloaded_pages;
-    std::queue<QString> processed;
+    std::map<QString /*parent_url*/, std::list<QString>> m_downloaded_graph;
+    std::queue<QString> m_work_queue;
+    std::vector<int> m_processed;
 
     //! thread pool for search in downloaded URLs
     QThreadPool m_local_search_thread_pool;

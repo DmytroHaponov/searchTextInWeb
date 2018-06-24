@@ -51,7 +51,7 @@ Scanner::Scanner(const QString& target_text, QObject* parent) : QObject(parent)
 
 QVector<int> Scanner::search_target_in_line(const QString& line)
 {
-    QRegularExpressionMatchIterator it = m_url_expr.globalMatch(line);
+    QRegularExpressionMatchIterator it = m_target_text_expr.globalMatch(line);
     QVector<int> found_positions;
     while (it.hasNext())
     {

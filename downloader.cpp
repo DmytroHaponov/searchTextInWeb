@@ -25,21 +25,29 @@ void DownLoader::run()
         event.processEvents();
         emit download_progress_changed(part, max, QString(""));
     });
-    connect(reply, &QNetworkReply::finished, [this, &event]{
+    connect(reply, &QNetworkReply::finished, [this, &event, url, &reply]
+    {
         emit download_finished(m_url_str);
-        event.quit();});
+        save_to_file(url, reply);
+        event.quit();
+    });
+    event.exec();    
+}
 
-    event.exec();
-
-
+void DownLoader::save_to_file(const QUrl& url, QNetworkReply *reply)
+{
     QFileInfo fileInfo = url.path();
-    QFile temp(QString("test/") + fileInfo.completeBaseName());
-    if(!temp.open(QIODevice::WriteOnly| QIODevice::Text))
+    QString file_name = QString("downloads/") + fileInfo.completeBaseName();
+    QFile output_file(file_name);
+    if(!output_file.open(QIODevice::WriteOnly| QIODevice::Text))
+    {
+        qDebug()<< "couldn't write to "<< output_file.fileName();
         return;
-    temp.write(reply->readAll());
+    }
+    output_file.write(reply->readAll());
 }
 /*
- *shift
+ *      shift
  *
 if (m_nPos)
 {
