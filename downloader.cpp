@@ -7,6 +7,8 @@
 #include <QFileInfo>
 #include <memory>
 
+namespace search {
+
 DownLoader::DownLoader(const QString& url, QObject* parent) :
     QObject(parent)
   , m_url_str(url)
@@ -46,6 +48,8 @@ void DownLoader::save_to_file(const QUrl& url, QNetworkReply *reply)
     }
     output_file.write(reply->readAll());
 }
+
+} //search
 /*
  *      shift
  *

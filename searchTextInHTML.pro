@@ -4,7 +4,8 @@ CONFIG += c++14
 SOURCES += main.cpp \
     searchengine.cpp \
     downloader.cpp \
-    scanner.cpp
+    scanner.cpp \
+    resultsproxy.cpp
 
 RESOURCES += qml.qrc
 
@@ -16,4 +17,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     searchengine.h \
     downloader.h \
-    scanner.h
+    scanner.h \
+    resultsproxy.h

@@ -1,9 +1,11 @@
-#ifndef DOWNLOADER_H
-#define DOWNLOADER_H
+#pragma once
 
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QRunnable>
+
+namespace search
+{
 
 class DownLoader : public QObject, public QRunnable
 {
@@ -47,4 +49,4 @@ private:
     QString m_url_str;
 };
 
-#endif // DOWNLOADER_H
+} // search

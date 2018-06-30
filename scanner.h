@@ -1,24 +1,17 @@
-#ifndef SCANNER_H
-#define SCANNER_H
+#pragma once
 
 #include <QObject>
 #include <QRegularExpression>
 #include <QPair>
 
-//using Results = QVector<QPair<int /*line*/, int /*column*/>>;
+namespace search {
 
-class Scanner : public QObject
+class Scanner
 {
-    Q_OBJECT
 public:
-    explicit Scanner(const QString& target_text, QObject *parent = nullptr);
-    QVector<int> search_target_in_line(const QString& line);
-    QStringList search_urls_in_line(const QString& line);
-
-signals:
-    //void found_target_text(Results results);
-
-public slots:
+    explicit Scanner(const QString& target_text);
+    QStringList search_target_in_line(const QString& line);
+    QStringList search_urls_in_line(const QString& text);
 
 private:
     QRegularExpression m_target_text_expr;
@@ -26,4 +19,4 @@ private:
     static const QString url_pattern;
 };
 
-#endif // SCANNER_H
+} //search

@@ -2,8 +2,13 @@
 #include "downloader.h"
 #include "scanner.h"
 #include <QFile>
-#include<QFileInfo>
+#include <QFileInfo>
+#include <QDir>
+#include "resultsproxy.h"
+
 #include <QDebug>
+
+namespace search {
 
 SearchEngine::SearchEngine(QObject *parent) : QObject(parent)
 {
@@ -15,10 +20,7 @@ void SearchEngine::download_page(const QString& page_name)
     DownLoader* downloader = new DownLoader(page_name);
     // downloader will be deleted by global Thread pool
     QThreadPool* global_thread_pool = QThreadPool::globalInstance();
-    connect(downloader, &DownLoader::download_progress_changed, /*[this](qint64 part, qint64 max, QString url)
-            {
-                emit SearchEngine::download_progress_changed(part, max, url);
-            }) ;*/
+    connect(downloader, &DownLoader::download_progress_changed,
             this, &SearchEngine::download_progress_changed);
     connect(downloader, &DownLoader::download_finished, this, &SearchEngine::on_page_downloaded);
     global_thread_pool->start(downloader);
@@ -60,13 +62,16 @@ void SearchEngine::set_max_URL_quantity(const QString& count)
 
 void SearchEngine::on_page_downloaded(const QString& url)
 {
-    emit download_progress_changed(1, 1, url);
+    emit download_progress_changed(1, 1, url); // 1 out of 1, that is download complete
     if(!m_downloaded_graph.size())
     {
         // start first scan
         QUrl url(m_starting_URL);
         QFileInfo fileInfo = url.path();
-        QString file_name = QString("downloads/") + fileInfo.completeBaseName();
+        QString auxilary_dir("downloads");
+        QDir cur_dir = QDir::current();
+        cur_dir.mkdir(auxilary_dir);
+        QString file_name = auxilary_dir + "/" + fileInfo.completeBaseName();
         QFile input_file(file_name);
         if (!input_file.open(QIODevice::ReadOnly))
         {
@@ -74,19 +79,23 @@ void SearchEngine::on_page_downloaded(const QString& url)
             return;
         }
         Scanner scanner(m_target_text);
-        QMap<int, QVector<int>> targets;
-        //QStringList new_urls;
+        QStringList new_urls;
         int line_number = 0;
         char line_text[1024];
         while(input_file.readLine(line_text, sizeof(line_text)) != -1)
         {
             ++line_number;
-            auto vec = scanner.search_target_in_line(QString(line_text));
-            if (vec.size())
+            QString line_text_str(line_text);
+            QStringList scan_results = scanner.search_target_in_line(line_text_str);
+            if (scan_results.size())
             {
-                targets.insert(line_number, vec);
+                ResultsProxy result(QString::number(line_number), scan_results);
+                m_results.append(QVariant::fromValue(result));
             }
+            new_urls.append(scanner.search_urls_in_line(line_text_str));
         }
+        emit resultsChanged();
+        m_downloaded_graph.insert(std::make_pair(m_starting_URL, std::move(new_urls)));
     }
     //m_downloaded_graph.at(url)
 }
@@ -107,3 +116,5 @@ int SearchEngine::qstring_to_int(const QString& count, const QString& msg)
     }
     return quantity;
 }
+
+} //search

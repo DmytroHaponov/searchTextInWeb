@@ -1,4 +1,4 @@
-import QtQuick 2.6
+import QtQuick 2.7
 import QtQuick.Window 2.2
 import QtQuick.Controls 2.2
 
@@ -6,7 +6,7 @@ Window {
     visible: true
     width: 800
     height: 600
-    title: qsTr("Searcher")
+    title: qsTr("search text in urls")
 
     Column {
         id: _inputsRow
@@ -133,6 +133,12 @@ Window {
         width: 100
     }
 
+ResultsView {
+    id: _results
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.top: _launchBtn.bottom
+    anchors.topMargin: 20
+}
     Connections {
         target: search_engine
         onError_msg: {

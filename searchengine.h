@@ -1,5 +1,4 @@
-#ifndef SEARCHENGINE_H
-#define SEARCHENGINE_H
+#pragma once
 
 #include <QObject>
 #include <map>
@@ -8,9 +7,13 @@
 #include <QNetworkReply>
 #include <QThreadPool>
 
+namespace search
+{
+
 class SearchEngine : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QVariantList results READ results NOTIFY resultsChanged)
 public:
     explicit SearchEngine(QObject *parent = nullptr);
 
@@ -19,6 +22,11 @@ public:
      * \param page_name - url to download
      */
     void download_page(const QString& page_name);
+
+    const QVariantList& results() const
+    {
+        return m_results;
+    }
 
 signals:
     /*!
@@ -34,6 +42,8 @@ signals:
      * \param url - what page
      */
     void download_progress_changed(qint64 part, qint64 max, QString url);
+
+    void resultsChanged();
 
 public slots:
     /*!
@@ -78,7 +88,7 @@ private:
 
 private:
     //! QString - parent url, where link was found
-    std::map<QString /*parent_url*/, std::list<QString>> m_downloaded_graph;
+    std::map<QString /*parent_url*/, QStringList> m_downloaded_graph;
     std::queue<QString> m_work_queue;
     std::vector<int> m_processed;
 
@@ -97,6 +107,9 @@ private:
     //! whether input data allows to implement search
     //! it's set to false in cases of fault inputs
     bool m_can_start_scan = true;
+
+    //! positions of found text - line and columns
+    QVariantList m_results;
 };
 
-#endif // SEARCHENGINE_H
+} // search

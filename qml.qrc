@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>InputAndLabel.qml</file>
+        <file>ResultsView.qml</file>
     </qresource>
 </RCC>
