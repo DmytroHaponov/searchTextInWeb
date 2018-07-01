@@ -3,9 +3,18 @@
 namespace search
 {
 
-ResultsProxy::ResultsProxy(const QString& line, const QStringList& columns)
+ResultsInLine::ResultsInLine(const QString& line, const QStringList& columns)
     : m_line(line)
     , m_columns(columns)
+{
+}
+
+//==================================================================================================
+
+
+ResultsProxy::ResultsProxy(const QString& url, QVariantList&& results)
+    : m_url(url)
+    , m_results(std::move(results))
 {
 }
 

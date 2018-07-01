@@ -74,7 +74,7 @@ public slots:
      * \brief once url is downloaded - start new scan &/or download
      * \param url - what page has been downloaded
      */
-    void on_page_downloaded(const QString& url);
+    void on_page_downloaded(const QString& url_str);
 
 private:
     /*!
@@ -88,15 +88,19 @@ private:
 
 private:
     //! QString - parent url, where link was found
-    std::map<QString /*parent_url*/, QStringList> m_downloaded_graph;
+    //! QStrigList - nodes of parent
+    std::map<QString /*parent_url*/, QStringList /*nodes*/> m_downloaded_graph;
     std::queue<QString> m_work_queue;
-    std::vector<int> m_processed;
+    std::vector<QString> m_processed;
+
+    //! Qt's global threadpool is used for downloading URLs
+    QThreadPool* m_global_thread_pool = QThreadPool::globalInstance();
 
     //! thread pool for search in downloaded URLs
     QThreadPool m_local_search_thread_pool;
 
-    //! search starts on this URL
-    QString m_starting_URL;
+    //! start new search from children of this URL
+    QString m_current_parent_URL;
 
     //! text to search
     QString m_target_text;

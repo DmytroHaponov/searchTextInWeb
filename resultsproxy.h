@@ -1,11 +1,13 @@
 #pragma once
 
 #include <QObject>
+#include <QVariant>
+#include <QVariantList>
 
 namespace search
 {
 
-class ResultsProxy
+class ResultsInLine
 {
     Q_GADGET
     Q_PROPERTY(QString line MEMBER m_line)
@@ -13,9 +15,9 @@ class ResultsProxy
 
 public:
     //! default ctor
-    ResultsProxy() = default;
+    ResultsInLine() = default;
     //! non-explicit ctor
-    ResultsProxy(const QString& line, const QStringList& columns);
+    ResultsInLine(const QString& line, const QStringList& columns);
 
 private:
     //! line with found target text
@@ -25,6 +27,25 @@ private:
     QStringList m_columns;
 };
 
+//==================================================================================================
+//==================================================================================================
+
+class ResultsProxy
+{
+    Q_GADGET
+    Q_PROPERTY(QString url MEMBER m_url)
+    Q_PROPERTY(QVariantList results_in_line MEMBER m_results)
+public:
+
+    ResultsProxy() = default;
+
+    explicit ResultsProxy(const QString& url, QVariantList&& results);
+private:
+    QString m_url;
+    QVariantList m_results;
+};
+
 } //search
 
+Q_DECLARE_METATYPE( search::ResultsInLine)
 Q_DECLARE_METATYPE( search::ResultsProxy)

@@ -25,7 +25,7 @@ void DownLoader::run()
     connect(reply, &QNetworkReply::downloadProgress, [this, &event](qint64 part, qint64 max)
     {
         event.processEvents();
-        emit download_progress_changed(part, max, QString(""));
+        emit download_progress_changed(part, max, m_url_str);
     });
     connect(reply, &QNetworkReply::finished, [this, &event, url, &reply]
     {
