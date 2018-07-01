@@ -1,10 +1,12 @@
 import QtQuick 2.7
+import QtQuick.Controls 2.4
 
 Item {
     id: root
     objectName: "results"
 
     height: _resultsRow.height + _titleRect.height
+    width: 200
 
     Rectangle {
         id: _titleRect
@@ -18,45 +20,61 @@ Item {
             text: qsTr("results:")
         }
     }
-
-    Column {
+    ListView {
         id: _resultsRow
+        anchors.left: parent.left
+        anchors.top: _titleRect.bottom
+        anchors.topMargin: 5
+        clip: true
+        height: 200
+        width: parent.width
         spacing: 5
-        anchors.centerIn: parent
 
-        Repeater {
-            id: _resultItem
-            model: search_engine.results
-
+        Component {
+            id: _resultsDelegate
             Rectangle {
                 id: _resultWrapper
-                height: 28
-                color: "#83d3ca"
-                border.color: "#c6dd2c"
-                width: _columnsRow.width
+                height: 40
+                color: "yellow"
+                border.color: "green"
+                border.width: 2
+                width: parent.width
 
                 Rectangle {
                     id: _lineRect
-                    height: parent.height/2
-                    width: parent.width
-                    color: "blue"
-                    border.color: "yellow"
+                    anchors.top: parent.top
+                    anchors.topMargin: 2
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    height: parent.height/2 - 2
+                    width: parent.width - 4
+                    color: "#9cdcf5"
 
                     Text {
                         id: lineText
-                        anchors.top: parent.top
-                        anchors.topMargin: 2
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: qsTr(modelData.line)
-                        font.pixelSize: 12
+                        anchors.centerIn: parent
+                        text: qsTr( "line: " + modelData.line)
+                        font.pixelSize: 14
                     }
                 }
+                Text {
+                    id: _columnTitle
+                    anchors.left: parent.left
+                    anchors.leftMargin: 2
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 2
+                    text: qsTr("columns: ")
+                    font.pixelSize: 14
+                }
+
 
                 Row {
                     id: _columnsRow
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 2
-                    height: parent.height
+                    anchors.left: _columnTitle.right
+                    anchors.leftMargin: 2
+                    height: parent.height/2 - 2
                     spacing: 5
                     Repeater {
                         id: _column
@@ -64,12 +82,22 @@ Item {
 
                         Text {
                             id: name
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 2
                             text: qsTr(modelData)
-                            font.pixelSize: 12
+                            font.pixelSize: 13
                         }
                     }
                 }
             }
+        }
+
+        model: search_engine.results
+        delegate: _resultsDelegate
+
+        ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AlwaysOn
+            visible: parent.count > 0
         }
     }
 }

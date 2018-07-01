@@ -22,7 +22,7 @@ Item {
             id: _URLlabelBack
             gradient: Gradient {
                 GradientStop { position: 0.4; color: "purple" }
-                GradientStop { position: 1.0; color: "green" }
+                GradientStop { position: 1.0; color: "lightblue" }
             }
         }
         color: "white"
