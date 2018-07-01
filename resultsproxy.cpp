@@ -14,7 +14,7 @@ ResultsInLine::ResultsInLine(const QString& line, const QStringList& columns)
 
 ResultsProxy::ResultsProxy(const QString& url, QVariantList&& results)
     : m_url(url)
-    , m_results(std::move(results))
+    , m_results_of_url(std::move(results))
 {
 }
 

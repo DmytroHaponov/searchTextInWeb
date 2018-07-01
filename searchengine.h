@@ -3,7 +3,7 @@
 #include <QObject>
 #include <map>
 #include <list>
-#include <queue>
+#include <QQueue>
 #include <QNetworkReply>
 #include <QThreadPool>
 
@@ -30,7 +30,7 @@ public:
 
 signals:
     /*!
-     * \brief error_msg - signal for QML to display error in C++ processing data passed from QML
+     * \brief signal for QML to display error happened in C++ processing data passed from QML
      * \param msg - message describing error
      */
     void error_msg(QString msg);
@@ -43,6 +43,9 @@ signals:
      */
     void download_progress_changed(qint64 part, qint64 max, QString url);
 
+    /*!
+     * \brief for view to update target search results
+     */
     void resultsChanged();
 
 public slots:
@@ -76,6 +79,8 @@ public slots:
      */
     void on_page_downloaded(const QString& url_str);
 
+    void append_new_results(QString url_str, QVariantList new_results);
+
 private:
     /*!
      * \brief convert QString to int, emit errors if need
@@ -90,7 +95,11 @@ private:
     //! QString - parent url, where link was found
     //! QStrigList - nodes of parent
     std::map<QString /*parent_url*/, QStringList /*nodes*/> m_downloaded_graph;
-    std::queue<QString> m_work_queue;
+
+    //! url to be scanned
+    QQueue<QString> m_work_queue;
+
+    //! urls that were scanned
     std::vector<QString> m_processed;
 
     //! Qt's global threadpool is used for downloading URLs

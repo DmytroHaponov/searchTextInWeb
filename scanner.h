@@ -1,37 +1,42 @@
 #pragma once
 
+#include <QRunnable>
 #include <QObject>
-#include <QRegularExpression>
+#include <QFile>
 
 namespace search {
 
-class Scanner
+class Scanner : public QObject, public QRunnable
 {
+    Q_OBJECT
 public:
-    explicit Scanner(const QString& target_text);
-    /**
-     * @brief searches target text in a single line
-     * @param line in which search is implemented
-     * @return list of positions of found targets
-     */
-    QStringList search_target_in_line(const QString& line);
+    explicit Scanner(QObject* engine, const QString& url_str, const QString& target_text,
+            QObject* parent = nullptr);
 
-    /**
-     * @brief searches url pattern in a single line
-     * @param line in which search for URLs is implemented
-     * @return list of found URLs
+    /*!
+     * \brief main method to start QRunnable
      */
-    QStringList search_urls_in_line(const QString& line);
+    void run() override;
 
 private:
-    //! regexp to search target text
-    QRegularExpression m_target_text_expr;
+    /*!
+     * \brief open file of downloaded URL
+     * \return success of opening file
+     */
+    bool open_downloaded_url();
 
-    //! regexp to search URL
-    QRegularExpression m_url_expr;
+private:
+    //! invoke slots of SearchEngine
+    QObject* m_engine;
 
-    //! pattern to search URL in text
-    static const QString url_pattern;
+    //! URL to process
+    QString m_url_str;
+
+    //! text to search
+    QString m_target_text;
+
+    //! downloaded URL file
+    QFile m_input_file;
 };
 
-} //search
+} // search

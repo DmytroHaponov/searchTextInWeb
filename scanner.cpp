@@ -1,47 +1,73 @@
 #include "scanner.h"
-#include <QRegularExpressionMatchIterator>
-#include <QVector>
+#include "scannerinline.h"
+#include "resultsproxy.h"
+#include "searchengine.h"
+#include <QFileInfo>
+#include <QUrl>
 
 namespace search {
 
-const QString Scanner::url_pattern =
-        // most adequate pattern from StackOverFlow
-        QString(
-            "(http|ftp|https)://([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?"
-            );
-
-Scanner::Scanner(const QString& target_text)
-  : m_target_text_expr(target_text)
-  , m_url_expr(url_pattern,
-               QRegularExpression::ExtendedPatternSyntaxOption |
-               QRegularExpression::MultilineOption |
-               QRegularExpression::DotMatchesEverythingOption |
-               QRegularExpression::CaseInsensitiveOption)
-{
+Scanner::Scanner(QObject* engine, const QString& url_str, const QString& target_text,
+                 QObject *parent)
+    : QObject(parent)
+    , m_engine(engine)
+    , m_url_str(url_str)
+    , m_target_text(target_text)
+{   
 }
 
-QStringList Scanner::search_target_in_line(const QString& line)
+void Scanner::run()
 {
-    QRegularExpressionMatchIterator it = m_target_text_expr.globalMatch(line);
-    QStringList found_positions;
-    while (it.hasNext())
+    if (!open_downloaded_url())
     {
-        QRegularExpressionMatch match = it.next();
-        found_positions.append(QString::number( match.capturedStart()));
+        return;
     }
-    return found_positions;
+    ScannerInLine scanner(m_target_text);
+    QStringList new_urls;
+    QVariantList results;
+    int line_number = 0;
+    char line_text[1024];
+    while(m_input_file.readLine(line_text, sizeof(line_text)) != -1)
+    {
+        ++line_number;
+        QString line_text_str(line_text);
+
+        QStringList scan_results = scanner.search_target_in_line(line_text_str);
+        if (scan_results.size())
+        {
+            ResultsInLine result(QString::number(line_number), scan_results);
+            results.append(QVariant::fromValue(result));
+        }
+
+        QStringList found_urls = scanner.search_urls_in_line(line_text_str);
+        if (!found_urls.empty())
+        {
+            new_urls.append(found_urls);
+        }
+    }
+    if (!results.isEmpty())
+    {
+         QMetaObject::invokeMethod(m_engine, "append_new_results",
+                                   Qt::QueuedConnection,
+                                   Q_ARG(QString, m_url_str),
+                                   Q_ARG(QVariantList, results));
+    }
+
 }
 
-QStringList Scanner::search_urls_in_line(const QString& line)
+bool Scanner::open_downloaded_url()
 {
-    QRegularExpressionMatchIterator it = m_url_expr.globalMatch(line);
-    QStringList URLs;
-    while (it.hasNext())
+    QUrl url(m_url_str);
+    QFileInfo fileInfo = url.path();
+    QString auxilary_dir("downloads");
+    QString file_name = auxilary_dir + "/" + fileInfo.completeBaseName();
+    m_input_file.setFileName(file_name);
+    if (!m_input_file.open(QIODevice::ReadOnly))
     {
-        QRegularExpressionMatch match = it.next();
-        URLs.append(match.captured());
+        qDebug()<< "could not read " << m_input_file.fileName();
+        return false;
     }
-    return URLs;
+    return true;
 }
 
 } //search

@@ -75,7 +75,7 @@ Item {
                     anchors.top: _fileName.bottom
                     anchors.topMargin: 5
                     clip: true
-                    height: parent.height
+                    height: parent.height - 4
                     width: parent.width
                     spacing: 5
 
@@ -139,7 +139,7 @@ Item {
                         }
                     }
 
-                    model: modelData.results_in_line
+                    model: modelData.results_of_url
                     delegate: _resultsDelegate
 
                     ScrollBar.vertical: ScrollBar {

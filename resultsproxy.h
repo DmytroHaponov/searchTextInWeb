@@ -34,15 +34,24 @@ class ResultsProxy
 {
     Q_GADGET
     Q_PROPERTY(QString url MEMBER m_url)
-    Q_PROPERTY(QVariantList results_in_line MEMBER m_results)
+    Q_PROPERTY(QVariantList results_of_url MEMBER m_results_of_url)
 public:
 
     ResultsProxy() = default;
 
+    /**
+     * @brief ctor that moves QVariantList results into intself
+     * @param url - name of url
+     * @param results - data to display
+     */
     explicit ResultsProxy(const QString& url, QVariantList&& results);
+
 private:
+    //! URL for which target text results were found
     QString m_url;
-    QVariantList m_results;
+
+    //! all target text results from URL
+    QVariantList m_results_of_url;
 };
 
 } //search

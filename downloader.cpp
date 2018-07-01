@@ -50,6 +50,8 @@ void DownLoader::save_to_file(const QUrl& url, QNetworkReply *reply)
 }
 
 } //search
+
+
 /*
  *      shift
  *
