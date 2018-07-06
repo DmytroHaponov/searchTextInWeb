@@ -1,37 +1,56 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.4
 
-Item {
+Rectangle {
     id: root
     objectName: "results"
 
-    height: _allResults.height + _titleRect.height
+    height: 250 // effective _allResults.height
+            + _titleRect.height
+    radius: 8
+    gradient: Gradient {
+        GradientStop {
+            position: 0.05;
+            color: "#f75050";
+        }
+        GradientStop {
+            position: 0.56;
+            color: "#382121";
+        }
+        GradientStop {
+            position: 1.00;
+            color: "#accc1b";
+        }
+    }
+    border.color: "#fbf813"
+    border.width: 15
     width: 600
 
     Rectangle {
         id: _titleRect
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 18
+
+        anchors.top: root.top
+        anchors.horizontalCenter: root.horizontalCenter
+
+        height: 15
         color: "#1a1818"
         Text {
             id: _resultTitle
             anchors.centerIn: parent
             text: qsTr("results:")
-            font.pixelSize: 16
+            font.pixelSize: 15
         }
     }
 
     ListView {
         id: _allResults
-        orientation: ListView.Horizontal
-        anchors.left: parent.left
-        anchors.top: _titleRect.bottom
-        anchors.topMargin: 5
+
+        anchors.fill: root
+        anchors.margins: root.border.width + 3
+
         clip: true
+        orientation: ListView.Horizontal
         spacing: 10
-        height: 200
-        width: root.width
 
         model: search_engine.results
         delegate: _fileResultsDelegate
@@ -39,18 +58,31 @@ Item {
         ScrollBar.horizontal: ScrollBar {
             policy: ScrollBar.AlwaysOn
             visible: parent.count > 0
+
+            parent: _allResults.parent
+            anchors.left: _allResults.left
+            anchors.bottom: _allResults.bottom
+            anchors.bottomMargin: -8
+            width: _allResults.width
         }
 
         Component {
             id: _fileResultsDelegate
+
             Rectangle {
+                id: _fileResultsWrapper
+
                 border.color: "black"
+                border.width: 2
+
                 height: parent.height
                 width: 200
+
                 Label {
                     id: _fileName
                     anchors.top: parent.top
                     anchors.horizontalCenter: parent.horizontalCenter
+
                     text: modelData.url
                     height: 12
                     width: parent.width
@@ -71,16 +103,19 @@ Item {
 
                 ListView {
                     id: _resultsRow
+
                     anchors.left: parent.left
                     anchors.top: _fileName.bottom
                     anchors.topMargin: 5
+
                     clip: true
-                    height: parent.height - 4
+                    height: parent.height - 2*_fileResultsWrapper.border.width - _fileName.height
                     width: parent.width
                     spacing: 5
 
                     Component {
                         id: _resultsDelegate
+
                         Rectangle {
                             id: _resultWrapper
                             height: 40
@@ -91,6 +126,7 @@ Item {
 
                             Rectangle {
                                 id: _lineRect
+
                                 anchors.top: parent.top
                                 anchors.topMargin: 2
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -108,32 +144,48 @@ Item {
                             }
                             Text {
                                 id: _columnTitle
+
                                 anchors.left: parent.left
                                 anchors.leftMargin: 2
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: 2
+
                                 text: qsTr("columns: ")
-                                font.pixelSize: 14
+                                font.pixelSize: 15
                             }
 
-                            Row {
+                            ListView {
                                 id: _columnsRow
+
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: 2
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                height: parent.height/2 - 2
-                                spacing: 5
-                                Repeater {
-                                    id: _column
-                                    model: modelData.columns
+                                anchors.left: _columnTitle.right
+                                anchors.leftMargin: 4
 
-                                    Text {
-                                        id: name
-                                        anchors.bottom: parent.bottom
-                                        anchors.bottomMargin: 2
-                                        text: qsTr(modelData)
-                                        font.pixelSize: 13
-                                    }
+                                clip: true
+                                height: parent.height/2 - 2
+                                width: parent.width
+                                       - _columnTitle.width
+                                       - _columnTitle.anchors.leftMargin
+                                       - _columnsRow.anchors.leftMargin
+                                       - 2*_resultWrapper.border.width
+
+                                orientation: ListView.Horizontal
+                                spacing: 5
+
+                                model: modelData.columns
+                                delegate: Text {
+                                    id: _columnNumber
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: qsTr(modelData)
+                                    font.pixelSize: 13
+                                }
+                                ScrollBar.horizontal: ScrollBar {
+                                    parent: _columnsRow.parent
+                                    anchors.left: _columnsRow.left
+                                    anchors.bottom: _columnsRow.bottom
+                                    anchors.bottomMargin: -8
+                                    width: _columnsRow.width
                                 }
                             }
                         }

@@ -45,9 +45,11 @@ Window {
 
     RoundButton {
         id: _launchBtn
+
         anchors.bottom: _inputsRow.bottom
         anchors.bottomMargin: -radius
         anchors.horizontalCenter: _inputsRow.horizontalCenter
+
         height: 60
         width: 60
         radius: 30
@@ -80,31 +82,10 @@ Window {
         }
     }
 
-    Rectangle {
-        id: _errorPopup
-        anchors.centerIn: parent
-        height: 400
-        width: 400
-        color: "red"
-        Text {
-            id: _errorText
-            anchors.centerIn: parent
-        }
-        Button {
-            id: _errorBtn
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: 30
-            text: qsTr("OK")
-            onPressed: {
-                _errorPopup.visible = false;
-                _errorText.text = "";
-            }
-        }
-        visible: false
-    }
-
+    // TODO
     ProgressBar {
         id: _progressBar
+
         anchors.right: parent.right
         anchors.rightMargin: 50
         anchors.top: parent.top
@@ -135,10 +116,35 @@ Window {
 
     ResultsView {
         id: _results
+
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: _launchBtn.bottom
         anchors.topMargin: 20
     }
+
+    Rectangle {
+        id: _errorPopup
+        anchors.centerIn: parent
+        height: 400
+        width: 400
+        color: "red"
+        Text {
+            id: _errorText
+            anchors.centerIn: parent
+        }
+        Button {
+            id: _errorBtn
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: 30
+            text: qsTr("OK")
+            onPressed: {
+                _errorPopup.visible = false;
+                _errorText.text = "";
+            }
+        }
+        visible: false
+    }
+
     Connections {
         target: search_engine
         onError_msg: {
