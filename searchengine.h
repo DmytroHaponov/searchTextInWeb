@@ -3,6 +3,7 @@
 #include <QObject>
 #include <map>
 #include <list>
+#include <set>
 #include <QQueue>
 #include <QNetworkReply>
 #include <QThreadPool>
@@ -16,6 +17,8 @@ class SearchEngine : public QObject
     Q_PROPERTY(QVariantList results READ results NOTIFY resultsChanged)
 public:
     explicit SearchEngine(QObject *parent = nullptr);
+
+    ~SearchEngine();
 
     /*!
      * \brief download page to local file
@@ -79,6 +82,18 @@ public slots:
      */
     void on_page_downloaded(const QString& url_str);
 
+    /*!
+     * \brief add new_urls found on page url_str
+     * \param url_str - where new urls were found
+     * \param new_urls - what urls were found
+     */
+    void add_new_urls(QString url_str, QStringList new_urls);
+
+    /*!
+     * \brief add new search results to display - order does not matter
+     * \param url_str - for what url results should be displayed
+     * \param new_results - lines and columns where target text was found
+     */
     void append_new_results(QString url_str, QVariantList new_results);
 
 private:
@@ -94,22 +109,28 @@ private:
 private:
     //! QString - parent url, where link was found
     //! QStrigList - nodes of parent
-    std::map<QString /*parent_url*/, QStringList /*nodes*/> m_downloaded_graph;
+    std::map<QString /*parent_url*/, QStringList /*nodes*/> m_graph;
 
-    //! url to be scanned
-    QQueue<QString> m_work_queue;
+    //! downloaded urls to be scanned
+    QQueue<QString> m_queue_to_scan;
 
-    //! urls that were scanned
-    std::vector<QString> m_processed;
+    //! downloaded urls that were scanned
+    std::set<QString> m_scanned;
+
+    //! urls to download
+    QQueue<QString> m_queue_to_download;
+
+    //! downloaded urls
+    std::set<QString> m_downloaded;
 
     //! Qt's global threadpool is used for downloading URLs
-    QThreadPool* m_global_thread_pool = QThreadPool::globalInstance();
+    QThreadPool* m_thread_pool_for_downloads = QThreadPool::globalInstance();
 
     //! thread pool for search in downloaded URLs
-    QThreadPool m_local_search_thread_pool;
+    QThreadPool m_thread_pool_for_local_search;
 
     //! start new search from children of this URL
-    QString m_current_parent_URL;
+    QString m_current_URL;
 
     //! text to search
     QString m_target_text;
@@ -123,6 +144,8 @@ private:
 
     //! positions of found text - line and columns
     QVariantList m_results;
+
+    static int s_total_urls;
 };
 
 } // search

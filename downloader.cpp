@@ -24,13 +24,13 @@ void DownLoader::run()
     QEventLoop event;
     connect(reply, &QNetworkReply::downloadProgress, [this, &event](qint64 part, qint64 max)
     {
-        event.processEvents();
+      //  event.processEvents();
         emit download_progress_changed(part, max, m_url_str);
     });
     connect(reply, &QNetworkReply::finished, [this, &event, url, &reply]
     {
-        emit download_finished(m_url_str);
         save_to_file(url, reply);
+        emit download_finished(m_url_str);
         event.quit();
     });
     event.exec();    
