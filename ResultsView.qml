@@ -108,6 +108,19 @@ Rectangle {
                     anchors.top: _fileName.bottom
                     anchors.topMargin: 5
 
+                    header: Rectangle {
+                        id: _urlHeader
+                        color: "black"
+                        width: parent.width
+                        height: 40
+                        Text {
+                            id: noResults
+                            text: qsTr("no Results")
+                            color: "red"
+                        }
+                        visible: model.length === 0
+                    }
+
                     clip: true
                     height: parent.height - 2*_fileResultsWrapper.border.width - _fileName.height
                     width: parent.width

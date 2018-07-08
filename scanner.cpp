@@ -52,7 +52,7 @@ void Scanner::run()
                                   Q_ARG(QString, m_url_str),
                                   Q_ARG(QVariantList, results));
     }
-    QMetaObject::invokeMethod(m_engine, "add_new_urls",
+    QMetaObject::invokeMethod(m_engine, "on_new_urls_result",
                               Qt::QueuedConnection,
                               Q_ARG(QString, m_url_str),
                               Q_ARG(QStringList, new_urls));

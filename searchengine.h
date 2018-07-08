@@ -87,7 +87,7 @@ public slots:
      * \param url_str - where new urls were found
      * \param new_urls - what urls were found
      */
-    void add_new_urls(QString url_str, QStringList q_new_urls);
+    void on_new_urls_result(QString url_str, QStringList q_new_urls);
 
     /*!
      * \brief add new search results to display - order does not matter
@@ -105,6 +105,10 @@ private:
      *           there's error message on UI
      */
     int qstring_to_int(const QString& count, const QString& msg);
+
+    void process_new_event(const QString& url_str);
+
+    void do_add_new_urls(const QStringList& q_new_urls);
 
 private:
     //! QString - parent url, where link was found
