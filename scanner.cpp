@@ -45,13 +45,12 @@ void Scanner::run()
             new_urls.append(found_urls);
         }
     }
-    if (!results.isEmpty())
-    {
-        QMetaObject::invokeMethod(m_engine, "append_new_results",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(QString, m_url_str),
-                                  Q_ARG(QVariantList, results));
-    }
+
+    QMetaObject::invokeMethod(m_engine, "append_new_results",
+                              Qt::QueuedConnection,
+                              Q_ARG(QString, m_url_str),
+                              Q_ARG(QVariantList, results));
+
     QMetaObject::invokeMethod(m_engine, "on_new_urls_result",
                               Qt::QueuedConnection,
                               Q_ARG(QString, m_url_str),

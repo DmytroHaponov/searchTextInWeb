@@ -112,13 +112,14 @@ Rectangle {
                         id: _urlHeader
                         color: "black"
                         width: parent.width
-                        height: 40
+                        height: visible ? 40 : 0
                         Text {
-                            id: noResults
+                            id: _noResults
+                            anchors.centerIn: parent
                             text: qsTr("no Results")
                             color: "red"
                         }
-                        visible: model.length === 0
+                        visible: modelData.results_of_url.length === 0
                     }
 
                     clip: true
