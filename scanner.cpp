@@ -47,10 +47,10 @@ void Scanner::run()
     }
     if (!results.isEmpty())
     {
-         QMetaObject::invokeMethod(m_engine, "append_new_results",
-                                   Qt::QueuedConnection,
-                                   Q_ARG(QString, m_url_str),
-                                   Q_ARG(QVariantList, results));
+        QMetaObject::invokeMethod(m_engine, "append_new_results",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(QString, m_url_str),
+                                  Q_ARG(QVariantList, results));
     }
     QMetaObject::invokeMethod(m_engine, "add_new_urls",
                               Qt::QueuedConnection,
@@ -60,14 +60,11 @@ void Scanner::run()
 
 bool Scanner::open_downloaded_url()
 {
-    QUrl url(m_url_str);
-    QFileInfo fileInfo = url.path();
     QString auxilary_dir("downloads/");
-    QString file_name = auxilary_dir + fileInfo.completeBaseName();
-    if (file_name == auxilary_dir)
-    {
-        file_name += m_url_str.remove(QRegExp("[-:/.//]"));
-    }
+    QString file_name = m_url_str;
+    file_name.remove(QRegExp("[-:/.//]"));
+    file_name = auxilary_dir + file_name;
+
     m_input_file.setFileName(file_name);
     if (!m_input_file.open(QIODevice::ReadOnly))
     {

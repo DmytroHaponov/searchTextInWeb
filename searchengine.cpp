@@ -126,6 +126,11 @@ void SearchEngine::add_new_urls(QString url_str, QStringList new_urls)
                 m_queue_to_scan.append(url);
             }
         }
+        if (m_queue_to_scan.isEmpty())
+        {
+            qDebug()<<"nothing new to scan";
+            return;
+        }
         m_current_URL = m_queue_to_scan.dequeue();
         if (/*m_downloaded.size() > m_scanned.size() */
                 /*!m_queue_to_scan.isEmpty()

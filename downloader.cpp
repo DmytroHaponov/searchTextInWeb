@@ -32,18 +32,17 @@ void DownLoader::run()
         emit download_finished(m_url_str);
         event.quit();
     });
-    event.exec();    
+    event.exec();
 }
 
 void DownLoader::save_to_file(const QUrl& url, QNetworkReply *reply)
 {
-    QFileInfo fileInfo = url.path();
+    Q_UNUSED(url); // believe it or not - WO CAPTURING "const QUrl& url" DOWNLOADED FILE IS EMPTY!!!
+
     QString auxilary_dir("downloads/");
-    QString file_name = auxilary_dir + fileInfo.completeBaseName();
-    if (file_name == auxilary_dir)
-    {
-        file_name += m_url_str.remove(QRegExp("[-:/.//]"));
-    }
+    QString file_name = m_url_str;
+    file_name.remove(QRegExp("[-:/.//]"));
+    file_name = auxilary_dir + file_name;
     QFile output_file(file_name);
     if(!output_file.open(QIODevice::WriteOnly| QIODevice::Text))
     {
