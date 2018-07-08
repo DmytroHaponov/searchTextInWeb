@@ -108,6 +108,21 @@ void SearchEngine::add_new_urls(QString url_str, QStringList q_new_urls)
     if(s_total_urls == m_max_URL_count)
     {
         qDebug()<< "received new urls while limit is already reached";
+
+        while ( m_downloaded.contains(m_current_URL)
+                && !m_scan_in_progress.contains(m_current_URL)
+                && m_queue_to_scan.size() )
+        {
+            m_scan_in_progress.append(m_current_URL);
+            Scanner* scanner = new Scanner(this, m_current_URL, m_target_text);
+            // scanner will be deleted by QThreadPool
+            m_thread_pool_for_local_search.start(scanner);
+            if (m_queue_to_scan.isEmpty())
+            {
+                break;
+            }
+            m_current_URL = m_queue_to_scan.dequeue();
+        }
         return;
     }
 
@@ -162,7 +177,7 @@ void SearchEngine::add_new_urls(QString url_str, QStringList q_new_urls)
     int shift_current_url_index = 0;
     QString shifted_url = m_current_URL;
     while ( m_downloaded.contains(shifted_url)
-            && !m_scan_in_progress.contains(m_current_URL)
+            && !m_scan_in_progress.contains(shifted_url)
             && m_queue_to_scan.size() > shift_current_url_index )
     {
         m_scan_in_progress.append(shifted_url);
