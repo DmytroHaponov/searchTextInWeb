@@ -87,7 +87,7 @@ public slots:
      * \param url_str - where new urls were found
      * \param new_urls - what urls were found
      */
-    void add_new_urls(QString url_str, QStringList new_urls);
+    void add_new_urls(QString url_str, QStringList q_new_urls);
 
     /*!
      * \brief add new search results to display - order does not matter
@@ -120,7 +120,7 @@ private:
     QSet<QString> m_scanned;
 
     //! urls to download
-    QQueue<QString> m_queue_to_download;
+    QMap<QString, std::list<QString>> m_early_scans;
 
     //! downloaded urls
     QSet<QString> m_downloaded;
