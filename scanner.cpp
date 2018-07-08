@@ -62,8 +62,12 @@ bool Scanner::open_downloaded_url()
 {
     QUrl url(m_url_str);
     QFileInfo fileInfo = url.path();
-    QString auxilary_dir("downloads");
-    QString file_name = auxilary_dir + "/" + fileInfo.completeBaseName();
+    QString auxilary_dir("downloads/");
+    QString file_name = auxilary_dir + fileInfo.completeBaseName();
+    if (file_name == auxilary_dir)
+    {
+        file_name += m_url_str.remove(QRegExp("[-:/.//]"));
+    }
     m_input_file.setFileName(file_name);
     if (!m_input_file.open(QIODevice::ReadOnly))
     {

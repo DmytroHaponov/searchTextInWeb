@@ -22,9 +22,8 @@ void DownLoader::run()
     std::unique_ptr< QNetworkAccessManager> m_qnam = std::make_unique<QNetworkAccessManager>();
     QNetworkReply* reply = m_qnam.get()->get(request);
     QEventLoop event;
-    connect(reply, &QNetworkReply::downloadProgress, [this, &event](qint64 part, qint64 max)
+    connect(reply, &QNetworkReply::downloadProgress, [this](qint64 part, qint64 max)
     {
-      //  event.processEvents();
         emit download_progress_changed(part, max, m_url_str);
     });
     connect(reply, &QNetworkReply::finished, [this, &event, url, &reply]
@@ -39,7 +38,12 @@ void DownLoader::run()
 void DownLoader::save_to_file(const QUrl& url, QNetworkReply *reply)
 {
     QFileInfo fileInfo = url.path();
-    QString file_name = QString("downloads/") + fileInfo.completeBaseName();
+    QString auxilary_dir("downloads/");
+    QString file_name = auxilary_dir + fileInfo.completeBaseName();
+    if (file_name == auxilary_dir)
+    {
+        file_name += m_url_str.remove(QRegExp("[-:/.//]"));
+    }
     QFile output_file(file_name);
     if(!output_file.open(QIODevice::WriteOnly| QIODevice::Text))
     {

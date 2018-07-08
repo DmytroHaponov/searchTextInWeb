@@ -111,17 +111,19 @@ private:
     //! QStrigList - nodes of parent
     std::map<QString /*parent_url*/, QStringList /*nodes*/> m_graph;
 
+    QStringList m_scan_in_progress;
+
     //! downloaded urls to be scanned
     QQueue<QString> m_queue_to_scan;
 
     //! downloaded urls that were scanned
-    std::set<QString> m_scanned;
+    QSet<QString> m_scanned;
 
     //! urls to download
     QQueue<QString> m_queue_to_download;
 
     //! downloaded urls
-    std::set<QString> m_downloaded;
+    QSet<QString> m_downloaded;
 
     //! Qt's global threadpool is used for downloading URLs
     QThreadPool* m_thread_pool_for_downloads = QThreadPool::globalInstance();
