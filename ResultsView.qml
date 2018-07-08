@@ -57,7 +57,7 @@ Rectangle {
 
         ScrollBar.horizontal: ScrollBar {
             policy: ScrollBar.AlwaysOn
-            visible: parent.count > 0
+            visible: _allResults.count > 0
 
             parent: _allResults.parent
             anchors.left: _allResults.left
