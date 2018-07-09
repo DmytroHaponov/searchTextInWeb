@@ -9,8 +9,9 @@
 
 namespace search {
 
-DownLoader::DownLoader(const QString& url, QObject* parent) :
+DownLoader::DownLoader(SearchEngine* engine, const QString& url, QObject* parent) :
     QObject(parent)
+  , m_engine(engine)
   , m_url_str(url)
 {
 }
@@ -30,7 +31,12 @@ void DownLoader::run()
     {
         save_to_file(url, reply);
         emit download_finished(m_url_str);
+        reply->deleteLater();
         event.quit();
+    });
+    connect(m_engine, &SearchEngine::abort_download, this, [this, &event, &reply]
+    {
+        reply->abort();
     });
     event.exec();
 }
@@ -50,7 +56,6 @@ void DownLoader::save_to_file(const QUrl& url, QNetworkReply *reply)
         return;
     }
     output_file.write(reply->readAll());
-    reply->deleteLater();
 }
 
 } //search

@@ -14,10 +14,11 @@ namespace search
 class SearchEngine : public QObject
 {
     Q_OBJECT
+    //! scan results: url page as header and lines + columns where text was found
     Q_PROPERTY(QVariantList results READ results NOTIFY resultsChanged)
+
 public:
     explicit SearchEngine(QObject *parent = nullptr);
-
     ~SearchEngine();
 
     /*!
@@ -26,12 +27,19 @@ public:
      */
     void download_page(const QString& page_name);
 
+    //! getter for results
     const QVariantList& results() const
     {
         return m_results;
     }
+    //! user pressed Stop btn
+    Q_INVOKABLE void stop();
 
 signals:
+
+    //! stop all active downloads after user pressed Stop btn
+    void abort_download();
+
     /*!
      * \brief signal for QML to display error happened in C++ processing data passed from QML
      * \param msg - message describing error
@@ -106,25 +114,24 @@ private:
      */
     int qstring_to_int(const QString& count, const QString& msg);
 
+    /*!
+     * \brief reaction to page download result or scan result
+     * \param url_str - what page was downloaded or scanned
+     */
     void process_new_event(const QString& url_str);
 
+    /*!
+     * \brief add found url to queue of scanning
+     * \param q_new_urls - found urls
+     */
     void do_add_new_urls(const QStringList& q_new_urls);
 
 private:
-    //! QString - parent url, where link was found
-    //! QStrigList - nodes of parent
-    std::map<QString /*parent_url*/, QStringList /*nodes*/> m_graph;
-
-    QStringList m_scan_in_progress;
-
     //! downloaded urls to be scanned
     QQueue<QString> m_queue_to_scan;
 
     //! downloaded urls that were scanned
     QSet<QString> m_scanned;
-
-    //! urls to download
-    QMap<QString, std::list<QString>> m_early_scans;
 
     //! downloaded urls
     QSet<QString> m_downloaded;
@@ -151,7 +158,11 @@ private:
     //! positions of found text - line and columns
     QVariantList m_results;
 
+    //! current total number of urls being processed
     static int s_total_urls;
+
+    //! app is stopped by user
+    bool m_stopped = false;
 };
 
 } // search

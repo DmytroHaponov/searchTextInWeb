@@ -32,18 +32,35 @@ SearchEngine::~SearchEngine()
 
 void SearchEngine::download_page(const QString& page_name)
 {
-    DownLoader* downloader = new DownLoader(page_name);
+    DownLoader* downloader = new DownLoader(this, page_name);
     // downloader will be deleted by global Thread pool
 
     connect(downloader, &DownLoader::download_progress_changed,
             this, &SearchEngine::download_progress_changed, Qt::QueuedConnection);
     connect(downloader, &DownLoader::download_finished, this, &SearchEngine::on_page_downloaded,
             Qt::QueuedConnection);
+   // connect(this, &SearchEngine::abort_download, downloader, &DownLoader::)
     m_thread_pool_for_downloads->start(downloader);
+}
+
+void SearchEngine::stop()
+{
+    emit abort_download();
+    m_stopped = true;
+    m_can_start_scan = true; // for possible new session
+    m_results.clear();
+    emit resultsChanged();
+    m_queue_to_scan.clear();
+    m_downloaded.clear();
+    m_scanned.clear();
+
+    m_thread_pool_for_downloads->clear();
+    m_thread_pool_for_local_search.clear();
 }
 
 void SearchEngine::on_main_URL_received(const QString& url)
 {
+    m_stopped = false;
     if (m_thread_pool_for_downloads->maxThreadCount() > m_max_URL_count)
     {
         m_can_start_scan = false;
@@ -55,6 +72,7 @@ void SearchEngine::on_main_URL_received(const QString& url)
     }
     m_URL_to_scan = url;
     download_page(m_URL_to_scan);
+    m_can_start_scan = false; // to prevent multiple user pressing Start btn
 }
 
 void SearchEngine::set_max_threads_count(const QString& count)
@@ -78,6 +96,10 @@ void SearchEngine::set_max_URL_quantity(const QString& count)
 
 void SearchEngine::on_page_downloaded(const QString& url_str)
 {
+    if (m_stopped)
+    {
+        return;
+    }
     emit download_progress_changed(1, 1, url_str); // 1 out of 1, that is download complete
 
     m_downloaded.insert(url_str);
@@ -86,6 +108,10 @@ void SearchEngine::on_page_downloaded(const QString& url_str)
 
 void SearchEngine::on_new_urls_result(QString url_str, QStringList q_new_urls)
 {
+    if (m_stopped)
+    {
+        return;
+    }
     m_scanned.insert(url_str);
 
     if(s_total_urls == m_max_URL_count)
@@ -116,6 +142,10 @@ void SearchEngine::on_new_urls_result(QString url_str, QStringList q_new_urls)
 
 void SearchEngine::append_new_results(QString url_str, QVariantList new_results)
 {
+    if (m_stopped)
+    {
+        return;
+    }
     m_results.append( QVariant::fromValue( ResultsProxy(url_str, std::move(new_results))));
     emit resultsChanged();
 }

@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QRunnable>
+#include "searchengine.h"
 
 namespace search
 {
@@ -16,7 +17,7 @@ public:
      * \param url to download
      * \param parent for QObject
      */
-    explicit DownLoader(const QString& url, QObject* parent = nullptr);
+    explicit DownLoader(SearchEngine* engine, const QString& url, QObject* parent = nullptr);
 
     /*!
      * \brief main method for QRunnable
@@ -45,6 +46,9 @@ private:
     void save_to_file(const QUrl& url, QNetworkReply *reply);
 
 private:
+    //! listen to signals from SearchEngine
+    SearchEngine* m_engine;
+
     //! url to download
     QString m_url_str;
 };

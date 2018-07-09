@@ -49,6 +49,7 @@ Window {
         anchors.bottom: _inputsRow.bottom
         anchors.bottomMargin: -radius
         anchors.horizontalCenter: _inputsRow.horizontalCenter
+        anchors.horizontalCenterOffset: 30
 
         height: 60
         width: 60
@@ -79,6 +80,22 @@ Window {
             search_engine.set_target_text(_targetText.input);
             search_engine.set_max_URL_quantity(_maxURLs.input);
             search_engine.on_main_URL_received(_mainUrl.input);
+        }
+    }
+
+    RoundButton {
+        id: _stopBtn
+
+        anchors.bottom: _launchBtn.bottom
+        anchors.horizontalCenter: _inputsRow.horizontalCenter
+        anchors.horizontalCenterOffset: -30
+
+        height: 60
+        width: 60
+        radius: 30
+        text: qsTr("stop")
+        onClicked: {
+            search_engine.stop();
         }
     }
 
@@ -119,7 +136,7 @@ Window {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: _launchBtn.bottom
-        anchors.topMargin: 20
+        anchors.topMargin: 40
     }
 
     Rectangle {
