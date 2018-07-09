@@ -27,7 +27,7 @@ QStringList ScannerInLine::search_target_in_line(const QString& line)
     while (it.hasNext())
     {
         QRegularExpressionMatch match = it.next();
-        found_positions.append(QString::number( match.capturedStart()));
+        found_positions.append(QString::number( match.capturedStart() + 1));
     }
     return found_positions;
 }

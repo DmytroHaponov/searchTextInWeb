@@ -15,7 +15,7 @@ int SearchEngine::s_total_urls = 0;
 
 SearchEngine::SearchEngine(QObject *parent) : QObject(parent)
 {
-    m_thread_pool_for_local_search.setMaxThreadCount(2); // not specified by requirements
+    m_thread_pool_for_local_search.setMaxThreadCount(1); // not specified by requirements
 
     QDir cur_dir = QDir::current();
     QString auxilary_dir("downloads");
@@ -53,8 +53,8 @@ void SearchEngine::on_main_URL_received(const QString& url)
     {
         return;
     }
-    m_current_URL = url;
-    download_page(m_current_URL);
+    m_URL_to_scan = url;
+    download_page(m_URL_to_scan);
 }
 
 void SearchEngine::set_max_threads_count(const QString& count)
@@ -102,11 +102,11 @@ void SearchEngine::on_new_urls_result(QString url_str, QStringList q_new_urls)
         qDebug()<<"nothing new to scan";
         return;
     }
-    m_current_URL = m_queue_to_scan.dequeue();
+    m_URL_to_scan = m_queue_to_scan.dequeue();
 
-    if ( m_downloaded.contains(m_current_URL) )
+    if ( m_downloaded.contains(m_URL_to_scan) )
     {
-        Scanner* scanner = new Scanner(this, m_current_URL, m_target_text);
+        Scanner* scanner = new Scanner(this, m_URL_to_scan, m_target_text);
         // scanner will be deleted by QThreadPool
         m_thread_pool_for_local_search.start(scanner);
         return;
@@ -139,18 +139,18 @@ int SearchEngine::qstring_to_int(const QString& count, const QString& msg)
 
 void SearchEngine::process_new_event(const QString& url_str)
 {
-    if ( url_str == m_current_URL && m_downloaded.contains(m_current_URL) )
+    if ( url_str == m_URL_to_scan && m_downloaded.contains(m_URL_to_scan) )
     {
-        Scanner* scanner = new Scanner(this, m_current_URL, m_target_text);
+        Scanner* scanner = new Scanner(this, m_URL_to_scan, m_target_text);
         // scanner will be deleted by QThreadPool
         m_thread_pool_for_local_search.start(scanner);
         if (m_queue_to_scan.size())
         {
-            m_current_URL = m_queue_to_scan.dequeue();
+            m_URL_to_scan = m_queue_to_scan.dequeue();
         }
         else if (m_downloaded.size() != 1)
         {
-            m_current_URL.clear(); // end
+            m_URL_to_scan.clear(); // end
         }
         return;
     }
@@ -179,7 +179,7 @@ void SearchEngine::do_add_new_urls(const QStringList& q_new_urls)
             download_page(url);
         }
 
-        if ( !m_scanned.contains(url) )
+        if ( !m_scanned.contains(url) && !m_queue_to_scan.contains(url) )
         {
             m_queue_to_scan.append(url);
         }

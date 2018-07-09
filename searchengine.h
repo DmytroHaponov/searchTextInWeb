@@ -136,7 +136,7 @@ private:
     QThreadPool m_thread_pool_for_local_search;
 
     //! start new search from children of this URL
-    QString m_current_URL;
+    QString m_URL_to_scan;
 
     //! text to search
     QString m_target_text;

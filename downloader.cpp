@@ -50,6 +50,7 @@ void DownLoader::save_to_file(const QUrl& url, QNetworkReply *reply)
         return;
     }
     output_file.write(reply->readAll());
+    reply->deleteLater();
 }
 
 } //search
