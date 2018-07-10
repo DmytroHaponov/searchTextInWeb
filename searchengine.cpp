@@ -53,6 +53,7 @@ void SearchEngine::stop()
     m_queue_to_scan.clear();
     m_downloaded.clear();
     m_scanned.clear();
+    s_total_urls = 0;
 
     m_thread_pool_for_downloads->clear();
     m_thread_pool_for_local_search.clear();
@@ -169,7 +170,9 @@ int SearchEngine::qstring_to_int(const QString& count, const QString& msg)
 
 void SearchEngine::process_new_event(const QString& url_str)
 {
-    if ( url_str == m_URL_to_scan && m_downloaded.contains(m_URL_to_scan) )
+    if ( url_str == m_URL_to_scan
+         && m_downloaded.contains(m_URL_to_scan)
+         && !m_scanned.contains(url_str) )
     {
         Scanner* scanner = new Scanner(this, m_URL_to_scan, m_target_text);
         // scanner will be deleted by QThreadPool
